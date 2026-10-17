@@ -26,8 +26,6 @@
   road += line(centers, '#d3d9cb', 1.5, 'opacity=".38"');
   road += line(near, '#f25240', 4) + line(far, '#ff654f', 4);
   road += line([near.at(-1), far.at(-1)], '#e0e9d5', 4);
-  const lip = centers.at(-1);
-  road += `<text x="${lip[0] - 130}" y="${lip[1] - 35}" fill="#d4dfc7">UPPER RETURN CURVE</text>`;
   $('road').innerHTML = road;
   const l = project(P.C.padLeft, 0), r = project(P.C.padRight, 0), cx = (l[0]+r[0])/2;
   $('landing').innerHTML = `<path d="M${l[0]-20} ${floorY-20}L${r[0]-20} ${floorY-20}L${r[0]+20} ${floorY+20}L${l[0]+20} ${floorY+20}Z" fill="#b7d49b" fill-opacity=".1" stroke="#b7d49b" stroke-width="1.5" stroke-dasharray="9 7"/>` +
