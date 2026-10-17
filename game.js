@@ -32,7 +32,7 @@
     `<path d="M${l[0]-18} ${floorY-21}H${r[0]-18}M${l[0]+18} ${floorY+21}H${r[0]+18}" stroke="#d3e5b8" stroke-width="3"/>` +
     `<path d="M${cx} ${floorY-12}V${floorY+12}M${cx-15} ${floorY}H${cx+15}" stroke="#d3e5b8" stroke-width="1.5"/><text x="${cx}" y="${floorY-40}" text-anchor="middle" fill="#cddfbc">RETURN LANDING ZONE</text>`;
 
-  let body = P.create(), paused = false, demo = false, assist = true, appliedInput = {};
+  let body = P.create(), demo = false, assist = true, appliedInput = {};
   let accumulator = 0, last = null, lastPhase = '', cameraX = project(body.x,body.y)[0]-300, cloudAge = 5, resultShown = false;
   const keys = new Set(), pointers = new Map(), trail = [];
   const bindings = { Space: 'drive', ArrowUp: 'vacuum', ArrowDown: 'up',
@@ -46,30 +46,20 @@
     body = P.create(); appliedInput = {}; cameraX=clamp(project(body.x,body.y)[0]-300,0,950);
     clearInput(); trail.length = 0; resultShown = false; cloudAge = 5;
     $('result').hidden = true; $('impactCloud').innerHTML = '';
-    lastPhase = ''; accumulator = 0; setPaused(false);
+    lastPhase = ''; accumulator = 0; last = null;
   }
   function startDemo() { demo = true; reset(); $('demo').textContent = 'Stop demo'; }
-  function setPaused(value) {
-    paused = value; clearInput(); accumulator = 0; last = null;
-    $('paused').hidden = !paused;
-    $('pause').textContent = paused ? 'Resume' : 'Pause';
-    $('pause').setAttribute('aria-label', paused ? 'Resume game' : 'Pause game');
-  }
   $('reset').onclick = $('retry').onclick = () => { stopDemo(); reset(); };
   $('demo').onclick = () => { if (demo) { stopDemo(); reset(); } else startDemo(); };
-  $('pause').onclick = () => setPaused(!paused);
   $('assist').onclick = () => {
     const effectiveAssist = demo ? appliedInput.assist : assist;
     stopDemo(); assist = !effectiveAssist; $('assist').setAttribute('aria-pressed', String(assist));
     $('assist').textContent = `Level assist ${assist ? 'ON' : 'OFF'}`;
   };
-  let helpWasPaused = false;
-  $('help').onclick = () => { helpWasPaused = paused; setPaused(true); $('instructions').showModal(); };
+  $('help').onclick = () => { clearInput(); $('instructions').showModal(); };
   $('closeHelp').onclick = $('helpDone').onclick = () => $('instructions').close();
-  $('instructions').addEventListener('close', () => setPaused(helpWasPaused));
   document.querySelectorAll('[data-hold]').forEach(button => {
     button.addEventListener('pointerdown', e => {
-      if (paused) return;
       e.preventDefault(); stopDemo();
       button.setPointerCapture(e.pointerId); pointers.set(e.pointerId, button.dataset.hold);
     });
@@ -77,7 +67,7 @@
       button.addEventListener(event, e => pointers.delete(e.pointerId));
     // Native keyboard activation of a hold button also gives it a short pulse.
     button.addEventListener('click', e => {
-      if (e.detail || paused) return;
+      if (e.detail || $('instructions').open) return;
       stopDemo(); const id = 'keyboard-' + button.dataset.hold;
       pointers.set(id, button.dataset.hold); setTimeout(() => pointers.delete(id), 200);
     });
@@ -85,13 +75,11 @@
   document.addEventListener('keydown', e => {
     if ($('instructions').open) return;
     if (e.code === 'KeyR' && !e.repeat) { stopDemo(); reset(); return; }
-    if (e.code === 'KeyP' && !e.repeat) { setPaused(!paused); return; }
-    if (paused) return;
     if (bindings[e.code]) { e.preventDefault(); stopDemo(); keys.add(e.code); }
   });
   document.addEventListener('keyup', e => keys.delete(e.code));
   window.addEventListener('blur', clearInput);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); });
+  document.addEventListener('visibilitychange', () => { clearInput(); last = null; accumulator = 0; });
   function controls() {
     if (demo) return P.demoInput(body);
     return { drive: +pressed('drive'), vacuum: +pressed('vacuum'),
@@ -135,7 +123,7 @@
       $('jet-' + direction).style.opacity = body.attached ? 0 : body.jets[direction];
     // Pitch assist uses the same limited fuel supply as the manually fired jets.
     $('jets').style.opacity = !body.attached && !resultShown ? Math.abs(body.pitchJet) * .45 : 0;
-    if (!paused && body.state === 'running' && !body.attached) {
+    if (body.state === 'running' && !body.attached) {
       trail.push([x, y]); if (trail.length > 200) trail.shift();
     }
     $('trail').setAttribute('d', trail.length ? path(trail) : '');
@@ -148,7 +136,7 @@
     $('vacState').textContent = !body.attached ? 'NO SURFACE CONTACT' : body.vacuum > .4 ? 'VACUUM ENGAGED' : 'HOLD ↑ FOR GRIP';
     $('runBadge').textContent = demo ? 'DEMO · PRESS ANY CONTROL TO TAKE OVER' : assist ? 'MANUAL JETS · LEVEL ASSIST ON' : 'MANUAL JETS · MANUAL PITCH';
     // Show the commands actually used by physics, including demo and assisted pitch jets.
-    const running = !paused && !['landed','crashed'].includes(body.state);
+    const running = !['landed','crashed'].includes(body.state);
     const levels = {
       drive: body.attached ? appliedInput.drive || 0 : 0,
       vacuum: appliedInput.vacuum || 0,
@@ -174,24 +162,25 @@
       cameraX += (clamp(x - 300, -50, 1000) - cameraX) * Math.min(1, dt * 5);
       $('scene').setAttribute('viewBox', `${cameraX} 0 650 900`);
     } else { cameraX = 0; $('scene').setAttribute('viewBox', '0 0 1440 900'); }
-    if (!paused) cloudAge += dt;
+    cloudAge += dt;
     $('impactCloud').setAttribute('opacity', Math.max(0, .65 - cloudAge * .28));
     touchdown();
   }
   function frame(time) {
+    if (document.hidden || $('instructions').open) {
+      last = null; accumulator = 0; requestAnimationFrame(frame); return;
+    }
     const dt = last === null ? 0 : Math.min((time - last) / 1000, .1);
     last = time;
-    if (!paused) {
-      accumulator += dt;
-      while (accumulator >= 1 / 120) {
-        appliedInput = controls();
-        P.step(body, appliedInput, 1 / 120);
-        accumulator -= 1 / 120;
-      }
+    accumulator += dt;
+    while (accumulator >= 1 / 120) {
+      appliedInput = controls();
+      P.step(body, appliedInput, 1 / 120);
+      accumulator -= 1 / 120;
     }
     render(dt); requestAnimationFrame(frame);
   }
   window.gripfall = Object.freeze({ getState: () => JSON.parse(JSON.stringify(body)), startDemo,
-    reset: () => { stopDemo(); reset(); }, isPaused: () => paused });
+    reset: () => { stopDemo(); reset(); } });
   requestAnimationFrame(frame);
 })();

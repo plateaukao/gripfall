@@ -17,7 +17,7 @@ Open `index.html` directly in a browser. No packages, server, build, or network 
 | W (optional) | Downward force to descend faster |
 | A / D | Front / rear lift jets to adjust pitch |
 | Level assist | Toggle automatic pitch correction |
-| R / P | Retry / pause |
+| R | Retry |
 
 There is no wheel-brake control or Q/E vacuum adjustment. The drive and vacuum buttons support simultaneous touch. Up Arrow applies suction toward the ramp and never fires landing jets. Vacuum does not provide lift in open air. Down Arrow fires exhaust downward, producing upward lift. All four landing jets remain independently controllable.
 
@@ -35,7 +35,7 @@ The game uses arcade physics in one vertical plane with a cinematic road rendere
 
 Run `node check.cjs` for the dependency-free physics checks: narrow reference profile, distant landing proportions, reversed launch, successful landing, hard impacts, insufficient grip, vacuum throttle release, all four jets, pitch control, and empty fuel.
 
-Chrome checks cover Space driving even after clicking Retry, hold/release ↑ suction, ↓ lift, independent directional jets, pitch jets, a complete return landing, pause/resume, help, simultaneous touch controls, and a 390px viewport.
+Chrome checks cover Space driving even after clicking Retry, hold/release ↑ suction, ↓ lift, independent directional jets, pitch jets, a complete return landing, help, simultaneous touch controls, and a 390px viewport.
 
 ## GitHub Pages
 
