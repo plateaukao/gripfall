@@ -113,6 +113,8 @@ window.createGripfallArena = canvas => {
       }
     });
     for (let i = 3; i < braces.length; i += 4) {
+      // Keep ground legs behind the ramp foot, clear of the hooked return opening.
+      if (braces[i].x < P.C.rampX) continue;
       beam(outer[i], [outer[i][0] + 10, 0, z], .2, steel);
       beam([outer[i][0] + 10, 0, z], outer[Math.max(0, i - 3)], .12, steel);
     }
