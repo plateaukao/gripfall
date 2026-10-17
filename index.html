@@ -1,6 +1,21 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Drive a vacuum-grip car through a backward-C ramp, then use directional jets to land it safely."><title>Grip / Fall — Stunt Arena</title><link rel="stylesheet" href="arena.css"></head><body>
-<!-- Direction B selected by user. Assumption: a side-plane physics game with a cinematic extruded road. No external assets or dependencies. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Drive a vacuum-grip car through a backward-C ramp, then use directional jets to land it safely."><title>Grip / Fall — Stunt Arena</title><link rel="stylesheet" href="arena.css">
+<!-- Google Analytics: shared with the personal website and blog; skip local previews. -->
+<script>
+(function () {
+  if (!location.hostname || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) return;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { window.dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', 'G-XQSZXV7E00');
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XQSZXV7E00';
+  document.head.appendChild(script);
+})();
+</script>
+</head><body>
+<!-- Direction B selected by user. Assumption: a side-plane physics game with a cinematic extruded road. Gameplay and artwork are self-contained. -->
 <main class="arena" id="arena">
 <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid meet" id="scene" role="img" aria-label="Playable car stunt arena with a backward-C ramp and a return landing pad">
 <defs>
