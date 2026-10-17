@@ -1,0 +1,8 @@
+.DS_Store
+reference/
+design-demos/
+design-*.md
+direction-approved.md
+video-analysis.md
+verification.json
+arena-*.png

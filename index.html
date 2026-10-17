@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Drive a vacuum-grip car through a backward-C ramp, then use directional jets to land it safely."><title>Grip / Fall — Stunt Arena</title><link rel="stylesheet" href="arena.css"></head><body>
+<!-- Direction B selected by user. Assumption: a side-plane physics game with a cinematic extruded road. No external assets or dependencies. -->
+<main class="arena" id="arena">
+<svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid meet" id="scene" role="img" aria-label="Playable car stunt arena with a backward-C ramp and a return landing pad">
+<defs>
+<linearGradient id="bg" x2="0" y2="1"><stop stop-color="#171a1a"/><stop offset=".6" stop-color="#3d4038"/><stop offset="1" stop-color="#353a2d"/></linearGradient>
+<linearGradient id="floor" x2=".7" y2="1"><stop stop-color="#727968"/><stop offset="1" stop-color="#242a21"/></linearGradient>
+<linearGradient id="ramp" x1=".1" y1="1" x2=".8" y2="0"><stop stop-color="#777e6d"/><stop offset=".28" stop-color="#a9aca0"/><stop offset=".58" stop-color="#7b8078"/><stop offset=".85" stop-color="#5e6462"/><stop offset="1" stop-color="#aeb0a5"/></linearGradient>
+<linearGradient id="side" x2="1" y2="0"><stop stop-color="#31382f"/><stop offset="1" stop-color="#101716"/></linearGradient>
+<linearGradient id="silver" x2=".2" y2="1"><stop stop-color="#fafbf8"/><stop offset=".35" stop-color="#929f9d"/><stop offset=".6" stop-color="#d1dbd5"/><stop offset="1" stop-color="#485451"/></linearGradient>
+<linearGradient id="exhaust" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".2" stop-color="#cbfaff"/><stop offset="1" stop-color="#b7e7fa" stop-opacity="0"/></linearGradient>
+<radialGradient id="haze"><stop stop-color="#c3d1ac" stop-opacity=".13"/><stop offset="1" stop-color="#c3d1ac" stop-opacity="0"/></radialGradient>
+<radialGradient id="lamp"><stop stop-color="#edf7d3" stop-opacity=".55"/><stop offset="1" stop-color="#edf7d3" stop-opacity="0"/></radialGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="15"/></filter><filter id="glow"><feGaussianBlur stdDeviation="3"/></filter>
+<pattern id="concrete" width="105" height="70" patternUnits="userSpaceOnUse"><path d="M0 0H105V70" fill="none" stroke="#dbe0cc" stroke-opacity=".045"/></pattern>
+</defs>
+<rect width="1440" height="900" fill="url(#bg)"/>
+<path d="M0 85L1440 0M0 275L1440 151M0 449L1440 341" stroke="#717768" stroke-opacity=".12" fill="none"/>
+<g stroke="#878f78" stroke-opacity=".11"><path d="M94 0L94 645M352 0L352 647M610 0L610 648M868 0L868 642M1126 0L1126 638M1384 0L1384 634"/><path d="M0 345L1440 246M0 440L1440 372M0 540L1440 500"/></g>
+<path d="M0 655L1440 572V900H0Z" fill="url(#floor)"/>
+<g stroke="#b7c6a2" stroke-opacity=".1" fill="none"><path d="M0 687L1440 618M0 780L1440 694M0 890L1440 796M219 649L0 900M457 636L306 900M699 621L670 900M942 608L1062 900M1182 590L1440 861"/></g>
+<ellipse cx="1040" cy="545" rx="600" ry="310" fill="url(#haze)"/>
+<g opacity=".35"><path d="M340 63L510 655L871 630Z" fill="#d4d9b7" opacity=".055"/><path d="M1190 70L812 654L1410 633Z" fill="#d4d9b7" opacity=".07"/></g>
+<g fill="#d7dcc6"><rect x="328" y="55" width="37" height="4"/><rect x="1175" y="68" width="37" height="4"/></g><ellipse cx="350" cy="60" rx="75" ry="45" fill="url(#lamp)"/><ellipse cx="1195" cy="72" rx="75" ry="45" fill="url(#lamp)"/>
+
+<g id="road"></g><g id="landing"></g><path id="trail" fill="none" stroke="#bfd6c4" stroke-width="1.5" stroke-dasharray="4 7" opacity=".45"/>
+<ellipse id="carShadow" cx="250" cy="661" rx="27" ry="8" fill="#0b120c" opacity=".35"/>
+<g id="worldJets"><g id="jet-up"><path d="M-17 14L-25 102L-10 14M10 14L24 102L18 14" fill="url(#exhaust)"/><path d="M-17 14L-20 67M17 14L20 67" stroke="#efffff" stroke-width="2"/></g><g id="jet-down" transform="rotate(180)"><path d="M-13 16L-15 76L-6 16M6 16L15 76L13 16" fill="url(#exhaust)"/></g><g id="jet-left" transform="rotate(-90)"><path d="M-8 24L0 90L8 24" fill="url(#exhaust)"/></g><g id="jet-right" transform="rotate(90)"><path d="M-8 24L0 90L8 24" fill="url(#exhaust)"/></g></g>
+<g class="vehicle" id="car" transform="translate(870 410) rotate(-79)">
+<ellipse id="contact" cx="-3" cy="18" rx="38" ry="8" fill="#f2694d" opacity=".7" filter="url(#glow)"/>
+<g id="jets"><path d="M-25 16L-33 114L-18 16M18 16L15 108L28 16" fill="url(#exhaust)"/><path d="M-25 16L-28 80M23 16L21 80" stroke="#f3ffff" stroke-width="3"/><ellipse cx="0" cy="85" rx="45" ry="15" fill="#c9eefa" opacity=".16" filter="url(#blur)"/></g>
+<g class="jet-flare"><path d="M-36 5L-100 7L-35 13" fill="url(#exhaust)"/><path d="M36 5L95 7L35 13" fill="url(#exhaust)"/></g>
+<rect x="-28" y="-14" width="13" height="10" rx="3" fill="#0e1614"/><rect x="21" y="-14" width="13" height="10" rx="3" fill="#0e1614"/><rect x="-28" y="11" width="13" height="10" rx="3" fill="#101814"/><rect x="21" y="11" width="13" height="10" rx="3" fill="#101814"/>
+<path d="M-37 4L-28-8L10-13L33-7L42 4L35 15L-26 18L-39 12Z" fill="url(#silver)" stroke="#c2cec6" stroke-width=".7"/><path d="M-16-7L7-11L22-5L22 6L-17 8Z" fill="#34433f" stroke="#d0d7cf" stroke-width="1"/><path d="M-11-7L5-9L14-4L-13 0Z" fill="#83978c"/><path d="M-38 4L-23 3M27 0L36 3" stroke="#f1ffe3" stroke-width="2"/><path d="M-33 12L-24 12" stroke="#e2513b" stroke-width="2"/>
+</g>
+
+<g id="impactCloud"></g></svg>
+<div class="vignette"></div>
+<header class="top"><div><span class="brand">GRIP<i>/</i>FALL</span><span class="preview">STUNT ARENA / 01</span></div><nav class="topright" aria-label="Game actions"><button class="text-button" id="demo">Watch demo</button><button class="text-button" id="pause" aria-label="Pause game">Pause</button><button class="text-button" id="help" aria-label="Show controls">?</button><button class="reset" id="reset" aria-label="Restart run">↻</button></nav></header>
+<section class="stages"><div class="eyebrow" id="stageEyebrow">A CONTROLLED RETURN</div><h1 class="stage-title" id="stageTitle">01<span> / </span>APPROACH</h1><p class="stage-note" id="stageNote">Hold Space to drive.<br>Hold ↑ for vacuum grip.</p><div id="runBadge" class="run-badge">MANUAL CONTROL</div></section>
+<aside class="telemetry" aria-label="Live car telemetry"><small>ALTITUDE</small><b><span id="altitude">0.0</span><em>m</em></b><div class="line"></div><small>SPEED</small><b><span id="speed">0.0</span><em>m/s</em></b><div class="line"></div><small>VERTICAL SPEED</small><b><span id="fallSpeed">0.0</span><em>m/s</em></b><div class="fuel-label"><small>JET FUEL</small><span id="fuelValue">100%</span></div><meter id="fuel" min="0" max="100" low="20" value="100" aria-label="Jet fuel remaining"></meter></aside>
+<div class="bottom"><div class="controls"><section class="panel drive"><div class="panel-label">DRIVE &amp; GRIP</div><div class="ground-buttons"><button data-hold="drive" class="drive-button" aria-label="Hold Space to drive">SPACE · DRIVE</button><button data-hold="vacuum" class="vacuum-button" aria-label="Hold Arrow Up for vacuum">↑ · VACUUM</button></div><div class="vac-status"><span id="vacState">HOLD ↑ FOR GRIP</span><span id="vacValue">0%</span></div><meter id="vacuumPower" min="0" max="1" value="0" aria-label="Vacuum throttle power"></meter></section></div>
+<section class="panel flight"><div class="panel-label">LANDING JETS <span class="key">↓ LIFT / ← →</span></div><div class="flight-controls"><div class="pad"><button data-hold="down" aria-label="W, downward thrust to descend" title="W: downward thrust to descend">W</button><button data-hold="left" aria-label="Thrust left">←</button><button data-hold="right" aria-label="Thrust right">→</button><button data-hold="up" aria-label="Arrow Down, fire downward exhaust for upward lift" title="Hold Down Arrow: fire jets downward to lift the car">↓<span class="lift-label">LIFT</span></button><span class="core">✧</span></div><div class="pitch-controls"><span>PITCH JETS</span><div><button data-hold="noseUp" aria-label="Front lift jet, pitch nose up">A ↶</button><button data-hold="noseDown" aria-label="Rear lift jet, pitch nose down">D ↷</button></div><button id="assist" aria-pressed="true">Level assist ON</button></div></div><small>Slow your descent. Settle inside the lights.</small></section></div>
+<footer class="legend"><span>SPACE DRIVE · ↑ VACUUM · ↓ LIFT · ← → STEER · A / D PITCH</span><span>R RETRY · P PAUSE</span></footer>
+<section id="result" class="result" aria-live="polite" hidden><span id="resultLabel">TOUCHDOWN</span><h2 id="resultTitle"></h2><p id="resultDetail"></p><button id="retry">One more run <span>R ↵</span></button></section>
+<div id="paused" class="paused" hidden>PAUSED <span>Press P or Resume</span></div>
+<dialog id="instructions"><button id="closeHelp" aria-label="Close controls">×</button><h2>Climb. Hook back. Land.</h2><p>The ramp bends back toward your starting side. Hold ↑ for suction through the curve, then hold ↓ to fire the lift jets. During the demo, highlighted buttons show the commands being used.</p><dl><dt>Space (hold)</dt><dd>Drive forward along the ground and ramp</dd><dt>↑ (hold)</dt><dd>Suction pulls the car against the ramp; release to let it wind down. This does not fire jets.</dd><dt>↓ (hold)</dt><dd>Fire jets downward to push the car upward and slow its fall</dd><dt>← / →</dt><dd>Left / right landing thrust</dd><dt>W (optional)</dt><dd>Downward thrust to descend faster</dd><dt>A / D</dt><dd>Front / rear lift jets to adjust pitch</dd><dt>Level assist</dt><dd>Automatically uses pitch jets; directional thrust stays manual</dd><dt>R / P</dt><dd>Retry / pause</dd></dl><p>Land inside the lit zone with a level body, vertical speed below 4.2 m/s, and horizontal speed below 5.2 m/s. Jets use fuel. Vacuum works only at the surface.</p><button id="helpDone">Got it</button></dialog>
+</main><script src="physics.js"></script><script src="game.js"></script></body></html>
