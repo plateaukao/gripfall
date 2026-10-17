@@ -1,40 +1,13 @@
 (() => {
   'use strict';
   const P = window.Gripfall, $ = id => document.getElementById(id);
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  const floorY = 710, scale = 9;
-  const project = (x, y) => [280 + x * scale, floorY - y * scale];
-  const point = p => p.map(n => n.toFixed(2)).join(' ');
-  const path = points => 'M' + points.map(point).join('L');
-  const line = (points, color, width = 1, extra = '') => `<path d="${path(points)}" fill="none" stroke="${color}" stroke-width="${width}" ${extra}/>`;
-  const samples = [];
-  for (let s = P.C.rampX-16; s < P.C.rampX; s += 2) samples.push(P.track(s));
-  samples.push(...P.curve);
-  const centers = samples.map(p => project(p.x, p.y));
-  // The depth vector rotates in projection so the hooked lip keeps its road width.
-  const near = centers.map(([x, y], i) => [x - 48, y - 13 * Math.cos(samples[i].angle)]);
-  const far = centers.map(([x, y], i) => [x + 48, y + 13 * Math.cos(samples[i].angle)]);
-  const shell = far.map(([x, y]) => [x + 19, y + 24]);
-  const surface = path(near) + 'L' + far.slice().reverse().map(point).join('L') + 'Z';
-  const structure = path(far) + 'L' + shell.slice().reverse().map(point).join('L') + 'Z';
-  let road = `<path d="${structure}" fill="url(#side)" stroke="#53604c" stroke-width="1"/><path d="${surface}" fill="url(#ramp)" stroke="#8d9781" stroke-width="1"/><path d="${surface}" fill="url(#concrete)"/>`;
-  for (let i = 2; i < centers.length; i += 26) {
-    road += line([far[i], shell[i]], '#738065', 2, 'opacity=".55"');
-    if (i + 26 < shell.length) road += line([far[i], shell[i + 26]], '#68785c', 1.5, 'opacity=".5"');
-    road += line([near[i], far[i]], '#414b3f', 1, 'opacity=".4"');
-  }
-  road += line(centers, '#d3d9cb', 1.5, 'opacity=".38"');
-  road += line(near, '#f25240', 4) + line(far, '#ff654f', 4);
-  road += line([near.at(-1), far.at(-1)], '#e0e9d5', 4);
-  $('road').innerHTML = road;
-  const l = project(P.C.padLeft, 0), r = project(P.C.padRight, 0), cx = (l[0]+r[0])/2;
-  $('landing').innerHTML = `<path d="M${l[0]-20} ${floorY-20}L${r[0]-20} ${floorY-20}L${r[0]+20} ${floorY+20}L${l[0]+20} ${floorY+20}Z" fill="#b7d49b" fill-opacity=".1" stroke="#b7d49b" stroke-width="1.5" stroke-dasharray="9 7"/>` +
-    `<path d="M${l[0]-18} ${floorY-21}H${r[0]-18}M${l[0]+18} ${floorY+21}H${r[0]+18}" stroke="#d3e5b8" stroke-width="3"/>` +
-    `<path d="M${cx} ${floorY-12}V${floorY+12}M${cx-15} ${floorY}H${cx+15}" stroke="#d3e5b8" stroke-width="1.5"/><text x="${cx}" y="${floorY-40}" text-anchor="middle" fill="#cddfbc">RETURN LANDING ZONE</text>`;
-
+  let view;
+  try { view = window.createGripfallArena($('scene')); }
+  catch (error) { $('renderError').hidden = false; console.error(error); }
+  $('resetView').onclick = () => view?.resetView();
   let body = P.create(), demo = false, assist = true, appliedInput = {};
-  let accumulator = 0, last = null, lastPhase = '', cameraX = project(body.x,body.y)[0]-300, cloudAge = 5, resultShown = false;
-  const keys = new Set(), pointers = new Map(), trail = [];
+  let accumulator = 0, last = null, lastPhase = '', resultShown = false;
+  const keys = new Set(), pointers = new Map();
   const bindings = { Space: 'drive', ArrowUp: 'vacuum', ArrowDown: 'up',
     KeyW: 'down', ArrowLeft: 'left', ArrowRight: 'right', KeyA: 'noseUp', KeyD: 'noseDown' };
   function clearInput() { keys.clear(); pointers.clear(); }
@@ -43,9 +16,9 @@
   }
   function stopDemo() { demo = false; $('demo').textContent = 'Watch demo'; }
   function reset() {
-    body = P.create(); appliedInput = {}; cameraX=clamp(project(body.x,body.y)[0]-300,0,950);
-    clearInput(); trail.length = 0; resultShown = false; cloudAge = 5;
-    $('result').hidden = true; $('impactCloud').innerHTML = '';
+    body = P.create(); appliedInput = {};
+    clearInput(); resultShown = false; view?.reset();
+    $('result').hidden = true;
     lastPhase = ''; accumulator = 0; last = null;
   }
   function startDemo() { demo = true; reset(); $('demo').textContent = 'Stop demo'; }
@@ -96,37 +69,16 @@
   };
   function touchdown() {
     if (resultShown || !['landed', 'crashed'].includes(body.state)) return;
-    resultShown = true; cloudAge = 0;
+    resultShown = true;
     const success = body.state === 'landed';
     $('resultLabel').textContent = success ? 'CLEAN TOUCHDOWN' : 'RUN ENDED';
     $('resultTitle').textContent = success ? `${body.score.toLocaleString()} points` : 'One more try.';
     const impact = body.impact;
     $('resultDetail').textContent = `${body.reason} Impact: ${Math.abs(impact.vy).toFixed(1)} m/s vertical, ${Math.abs(impact.vx).toFixed(1)} m/s horizontal. ${Math.round(body.fuel)}% fuel left.`;
     $('result').hidden = false;
-    const [x, y] = project(body.x, 0);
-    $('impactCloud').innerHTML = Array.from({ length: 18 }, (_, i) => {
-      const offset = Math.sin(i * 5.7) * (success ? 55 : 95);
-      return `<circle cx="${x + offset}" cy="${y - 8 - (i % 4) * 8}" r="${8 + i % 5 * 5}" fill="${success ? '#cedbce' : '#84938a'}"/>`;
-    }).join('');
   }
   function render(dt) {
-    const [x, y] = project(body.x, body.y);
-    const degrees = -body.angle * 180 / Math.PI;
-    $('car').setAttribute('transform', `translate(${x} ${y}) rotate(${degrees}) scale(.72)`);
-    $('contact').style.opacity = body.attached ? body.vacuum * .85 : 0;
-    $('carShadow').setAttribute('cx', x);
-    $('carShadow').setAttribute('cy', floorY+7);
-    $('carShadow').setAttribute('rx', 25 + body.y * .8);
-    $('carShadow').setAttribute('opacity', clamp(.35 - body.y / 140, .03, .35));
-    $('worldJets').setAttribute('transform', `translate(${x} ${y})`);
-    for (const direction of ['up', 'down', 'left', 'right'])
-      $('jet-' + direction).style.opacity = body.attached ? 0 : body.jets[direction];
-    // Pitch assist uses the same limited fuel supply as the manually fired jets.
-    $('jets').style.opacity = !body.attached && !resultShown ? Math.abs(body.pitchJet) * .45 : 0;
-    if (body.state === 'running' && !body.attached) {
-      trail.push([x, y]); if (trail.length > 200) trail.shift();
-    }
-    $('trail').setAttribute('d', trail.length ? path(trail) : '');
+    view?.render(body, dt);
     $('altitude').textContent = Math.max(0, body.y - P.C.height).toFixed(1);
     $('speed').textContent = Math.hypot(body.vx, body.vy).toFixed(1);
     $('fallSpeed').textContent = body.vy.toFixed(1);
@@ -158,12 +110,6 @@
       $('stageTitle').innerHTML = `${number}<span> / </span>${title}`;
       $('stageNote').innerHTML = note; lastPhase = body.phase;
     }
-    if (innerWidth <= 700) {
-      cameraX += (clamp(x - 300, -50, 1000) - cameraX) * Math.min(1, dt * 5);
-      $('scene').setAttribute('viewBox', `${cameraX} 0 650 900`);
-    } else { cameraX = 0; $('scene').setAttribute('viewBox', '0 0 1440 900'); }
-    cloudAge += dt;
-    $('impactCloud').setAttribute('opacity', Math.max(0, .65 - cloudAge * .28));
     touchdown();
   }
   function frame(time) {
@@ -180,7 +126,7 @@
     }
     render(dt); requestAnimationFrame(frame);
   }
-  window.gripfall = Object.freeze({ getState: () => JSON.parse(JSON.stringify(body)), startDemo,
+  window.gripfall = Object.freeze({ getState: () => JSON.parse(JSON.stringify(body)), getView: () => view?.getView(), startDemo,
     reset: () => { stopDemo(); reset(); } });
   requestAnimationFrame(frame);
 })();

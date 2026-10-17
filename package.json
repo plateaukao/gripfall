@@ -1,0 +1,16 @@
+{
+  "name": "gripfall",
+  "private": true,
+  "scripts": {
+    "build": "esbuild arena3d.js --bundle --minify --format=iife --target=es2020 --outfile=arena3d.bundle.js",
+    "test": "node check.cjs",
+    "test:browser": "node check-browser.cjs"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "playwright": "1.64.1"
+  }
+}

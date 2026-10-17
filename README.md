@@ -1,10 +1,10 @@
 # Grip / Fall — Stunt Arena
 
-A playable HTML car-stunt game with a cinematic arena, vacuum grip, and powered landings.
+A playable HTML car-stunt game with a cinematic Three.js 3D arena, vacuum grip, and powered landings.
 
 **[Play Grip / Fall](https://plateaukao.github.io/gripfall/)**
 
-Open `index.html` directly in a browser. No packages, server, build, or network connection are needed. Click **Watch demo** for a successful return, or drive with **Space + ↑**. During a demo, illuminated buttons show the real commands being used, including lift, steering, and automatic pitch jets; they clear at the end of the run.
+Open `index.html` directly in a browser. No packages, server, build, or network connection are needed to play: the Three.js renderer is bundled locally. A browser with WebGL 2 support is required. Click **Watch demo** for a successful return, or drive with **Space + ↑**. During a demo, illuminated buttons show the real commands being used, including lift, steering, and automatic pitch jets; they clear at the end of the run.
 
 ## Controls
 
@@ -18,6 +18,10 @@ Open `index.html` directly in a browser. No packages, server, build, or network 
 | A / D | Front / rear lift jets to adjust pitch |
 | Level assist | Toggle automatic pitch correction |
 | R | Retry |
+| Left mouse drag / one-finger drag | Orbit the 3D arena |
+| Scroll / pinch | Zoom |
+| Right mouse drag / two-finger drag | Pan |
+| Reset view | Restore the arena camera |
 
 There is no wheel-brake control or Q/E vacuum adjustment. The drive and vacuum buttons support simultaneous touch. Up Arrow applies suction toward the ramp and never fires landing jets. Vacuum does not provide lift in open air. Down Arrow fires exhaust downward, producing upward lift. All four landing jets remain independently controllable.
 
@@ -29,11 +33,13 @@ The ramp is 66 game meters high, rises from a foot at x=112, reaches its rightmo
 
 Vacuum adds surface adhesion and wheel traction. Jets and automatic pitch correction consume fuel. Landing requires both wheels inside the lit zone, body angle within 15 degrees, vertical speed at most 4.2 m/s, and horizontal speed at most 5.2 m/s. Hard or body-first impacts end the run.
 
-The game uses arcade physics in one vertical plane with a cinematic road rendered with depth.
+The game uses arcade physics in one vertical plane with a true 3D road, car, lights, shadows, steel supports, and exhaust. Mouse gestures change only the camera; the car stays in its original vertical stunt plane, so Space and arrow controls remain consistent from every view. On phones the camera follows the car while retaining the chosen orbit angle.
 
 ## Verification
 
 Run `node check.cjs` for the dependency-free physics checks: narrow reference profile, distant landing proportions, reversed launch, successful landing, hard impacts, insufficient grip, vacuum throttle release, all four jets, pitch control, and empty fuel.
+
+Run `npm ci` and `npm run test:browser` (with Google Chrome installed) to check WebGL rendering, mouse orbit/zoom/pan/reset, touch orbit, keyboard camera isolation, and successful desktop/mobile demo landings. Screenshots are saved in a temporary folder.
 
 Chrome checks cover Space driving even after clicking Retry, hold/release ↑ suction, ↓ lift, independent directional jets, pitch jets, a complete return landing, help, simultaneous touch controls, and a 390px viewport.
 
@@ -42,3 +48,7 @@ Chrome checks cover Space driving even after clicking Retry, hold/release ↑ su
 The game is published from the root of the `main` branch at https://plateaukao.github.io/gripfall/. Push changes to `main` to update the live game. `.nojekyll` serves the static files directly.
 
 The original local reference images, design studies, screenshots, and notes are ignored by Git.
+
+## 3D renderer maintenance
+
+`arena3d.js` uses [Three.js](https://threejs.org/) 0.186.1 and its [OrbitControls](https://threejs.org/docs/pages/OrbitControls.html). `arena3d.bundle.js` is committed so GitHub Pages and offline previews need no build service or CDN. To modify the renderer, run `npm ci`, then `npm run build`. The pinned dependencies and lockfile make the bundle reproducible. Three.js is MIT licensed; see `THREE-LICENSE.txt`.
